@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .player-list, .playing-eleven {
+            width: 45%;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .player-list {
+            height: 500px;
+            overflow-y: auto;
+        }
+        h2 {
+            text-align: center;
+        }
+        .player, .box {
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            text-align: center;
+            background-color: #fff;
+            cursor: grab;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .box {
+            border-color: #28a745;
+            height: 50px;
+            background-color: #e9ffe9;
+        }
+        .box.empty {
+            background-color: #f4f4f4;
+            border-style: dashed;
+            color: #aaa;
+            justify-content: center;
+            cursor: default;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        .delete-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="player-list">
+            <h2>Royal Challengers Bengaluru</h2>
+        </div>
+        
+        <script>
+            const rcbPlayers = [
+                { name: "Virat Kohli", role: "BAT" },
+                { name: "Josh Hazlewood", role: "BOWL" },
+                { name: "Phil Salt", role: "BAT" },
+                { name: "Rajat Patidar", role: "BAT" },
+                { name: "Jitesh Sharma", role: "BAT" },
+                { name: "Bhuvneshwar Kumar", role: "BOWL" },
+                { name: "Liam Livingstone", role: "AR" },
+                { name: "Rasikh Salam", role: "BOWL" },
+                { name: "Krunal Pandya", role: "AR" },
+                { name: "Yash Dayal", role: "BOWL" },
+                { name: "Tim David", role: "AR" },
+                { name: "Suyash Sharma", role: "BOWL" },
+                { name: "Jacob Bethell", role: "AR" },
+                { name: "Devdutt Padikkal", role: "BAT" },
+                { name: "Nuwan Thushara", role: "BOWL" },
+                { name: "Romario Shepherd", role: "AR" },
+                { name: "Lungi Ngidi", role: "BOWL" },
+                { name: "Swapnil Singh", role: "AR" },
+                { name: "Abhinandan Singh", role: "BOWL" },
+                { name: "Swastik Chikara", role: "BAT" },
+                { name: "Mohit Rathee", role: "BOWL" },
+                { name: "Manoj Bhandage", role: "AR" }
+            ];
+        
+            const rcbList = document.querySelector('.player-list');
+        
+            rcbPlayers.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player';
+                playerDiv.draggable = true;
+                playerDiv.textContent = `${player.name} (${player.role})`;
+                rcbList.appendChild(playerDiv);
+            });
+        </script>
+        
+        <!-- Playing XI -->
+        <div class="playing-eleven">
+            <h2>Playing XI</h2>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+        </div>
+    </div>
+
+    <script>
+        let draggedElement;
+
+        // Allow drop event
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        // Drag start event
+        document.querySelectorAll('.player').forEach(player => {
+            player.addEventListener('dragstart', function (event) {
+                draggedElement = event.target;
+                event.target.classList.add('dragging');
+            });
+            player.addEventListener('dragend', function (event) {
+                event.target.classList.remove('dragging');
+            });
+        });
+
+        // Drop event
+        function drop(event) {
+            event.preventDefault();
+            const box = event.target.closest('.box');
+
+            if (box && box.classList.contains('empty')) {
+                box.innerHTML = `
+                    ${draggedElement.textContent}
+                    <button class="delete-btn" onclick="deletePlayer(this)">Delete</button>
+                `;
+                box.classList.remove('empty');
+                draggedElement.remove();
+            }
+        }
+
+        // Delete player from Playing XI
+        function deletePlayer(button) {
+            const box = button.closest('.box');
+            const playerName = box.textContent.replace('Delete', '').trim();
+
+            // Restore player back to the list
+            const playerList = document.querySelector('.player-list');
+            const newPlayer = document.createElement('div');
+            newPlayer.classList.add('player');
+            newPlayer.textContent = playerName;
+            newPlayer.setAttribute('draggable', 'true');
+            newPlayer.addEventListener('dragstart', function (event) {
+                draggedElement = event.target;
+                event.target.classList.add('dragging');
+            });
+            newPlayer.addEventListener('dragend', function (event) {
+                event.target.classList.remove('dragging');
+            });
+            playerList.appendChild(newPlayer);
+
+            // Clear the box
+            box.classList.add('empty');
+            box.textContent = 'Drag Player Here';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .player-list, .playing-eleven {
+            width: 45%;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .player-list {
+            height: auto;
+            overflow-y: auto;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        .player, .box {
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            text-align: center;
+            background-color: #fff;
+            cursor: grab;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .box {
+            border-color: #28a745;
+            height: 50px;
+            background-color: #e9ffe9;
+        }
+        .box.empty {
+            background-color: #f4f4f4;
+            border-style: dashed;
+            color: #aaa;
+            justify-content: center;
+            cursor: default;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        .delete-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Player List -->
+        <div class="player-list">
+            <h2>Players</h2>
+        </div>
+        
+        <!-- Playing XI -->
+        <div class="playing-eleven">
+            <h2>Playing XI</h2>
+            <h3>Main XI</h3>
+            <!-- Main XI Slots -->
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+
+            <h3>Impact Players</h3>
+            <!-- Impact Players Slots -->
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <div class="box empty" ondrop="drop(event)" ondragover="allowDrop(event)">Drag Player Here</div>
+            <button onclick="saveAsPDF()">Save as PDF</button>
+            <style>
+                button {
+                    background-color: #28a745; /* Green color */
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-top: 20px;
+                }
+            
+                button:hover {
+                    background-color: #218838; /* Darker green on hover */
+                }
+            </style>
+        </div>
+        
+    </div>
+    
+    
+
+    <script>
+        const players = [
+            { name: "Ruturaj Gaikwad", role: "BAT" },
+            { name: "Ravindra Jadeja", role: "AR" },
+            { name: "Matheesha Pathirana", role: "BOWL" },
+            { name: "Shivam Dube", role: "AR" },
+            { name: "Noor Ahmad", role: "BOWL" },
+            { name: "Ravichandran Ashwin", role: "AR" },
+            { name: "Devon Conway", role: "BAT" },
+            { name: "Khaleel Ahmed", role: "BOWL" },
+            { name: "Rachin Ravindra", role: "AR" },
+            { name: "MS Dhoni", role: "BAT" },
+            { name: "Anshul Kamboj", role: "AR" },
+            { name: "Rahul Tripathi", role: "BAT" },
+            { name: "Sam Curran", role: "AR" },
+            { name: "Gurjapneet Singh", role: "BOWL" },
+            { name: "Nathan Ellis", role: "BOWL" },
+            { name: "Deepak Hooda", role: "AR" },
+            { name: "Jamie Overton", role: "AR" },
+            { name: "Vijay Shankar", role: "AR" },
+            { name: "Vansh Bedi", role: "BAT" },
+            { name: "C Andre Siddarth", role: "BAT" },
+            { name: "Ramakrishna Ghosh", role: "AR" },
+            { name: "Shaik Rasheed", role: "BAT" },
+            { name: "Mukesh Choudhary", role: "BOWL" },
+            { name: "Kamlesh Nagarkoti", role: "AR" },
+            { name: "Shreyas Gopal", role: "AR" }
+        ];
+
+        const playerList = document.querySelector('.player-list');
+        players.forEach(player => {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player';
+            playerDiv.draggable = true;
+            playerDiv.textContent = `${player.name} (${player.role})`;
+            playerList.appendChild(playerDiv);
+        });
+
+        let draggedElement;
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        document.querySelectorAll('.player').forEach(player => {
+            player.addEventListener('dragstart', function (event) {
+                draggedElement = event.target;
+                event.target.classList.add('dragging');
+            });
+            player.addEventListener('dragend', function (event) {
+                event.target.classList.remove('dragging');
+            });
+        });
+
+        function drop(event) {
+            event.preventDefault();
+            const box = event.target.closest('.box');
+            if (box && box.classList.contains('empty')) {
+                box.innerHTML = `
+                    ${draggedElement.textContent}
+                    <button class="delete-btn" onclick="deletePlayer(this)">Delete</button>
+                `;
+                box.classList.remove('empty');
+                draggedElement.remove();
+            }
+        }
+
+        function deletePlayer(button) {
+            const box = button.closest('.box');
+            const playerName = box.textContent.replace('Delete', '').trim();
+            const newPlayer = document.createElement('div');
+            newPlayer.classList.add('player');
+            newPlayer.textContent = playerName;
+            newPlayer.draggable = true;
+            newPlayer.addEventListener('dragstart', function (event) {
+                draggedElement = event.target;
+                event.target.classList.add('dragging');
+            });
+            newPlayer.addEventListener('dragend', function (event) {
+                event.target.classList.remove('dragging');
+            });
+            playerList.appendChild(newPlayer);
+            box.classList.add('empty');
+            box.textContent = 'Drag Player Here';
+        }
+
+        async function saveAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text('Team Selection', 10, 10);
+            doc.setFontSize(14);
+            doc.text('Playing XI:', 10, 30);
+            let yPos = 40;
+            document.querySelectorAll('.playing-eleven .box:not(.empty)').forEach((box, index) => {
+                const playerName = box.textContent.replace('Delete', '').trim();
+                doc.text(`${index + 1}. ${playerName}`, 10, yPos);
+                yPos += 10;
+            });
+            doc.save('team-selection.pdf');
+        }
+    </script>
+</body>
+</html>
